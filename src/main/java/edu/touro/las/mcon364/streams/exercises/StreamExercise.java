@@ -5,24 +5,19 @@ import java.util.stream.*;
 
 /**
  * In-Class Exercise: Working with Streams
- * 
  * Time: ~40 minutes
- * 
  * This exercise focuses on applying stream operations to analyze a gradebook
  * represented as a Map<String, List<Integer>> where:
  * - Key: Student name
  * - Value: List of grades (0-100)
- * 
  * Complete all methods marked with TODO.
  * Use stream operations - no explicit loops allowed!
  * 
  * See EXERCISES_README.md for detailed instructions.
  */
 public class StreamExercise {
-    
     // The gradebook: student name -> list of grades
     private final Map<String, List<Integer>> gradebook;
-    
     /**
      * Constructor initializes the gradebook with sample data.
      */
@@ -39,7 +34,7 @@ public class StreamExercise {
     }
     
     // =========================================================================
-    // PART 1: Basic Queries (10 minutes)
+    // PART 1: Basic Queries
     // =========================================================================
     
     /**
@@ -62,22 +57,32 @@ public class StreamExercise {
         // TODO: Implement using streams
         return 0;
     }
-    
+
     /**
      * Task 1.3: Get grades for a specific student.
-     * Return empty list if student not found.
-     * 
-     * Example: getStudentGrades("Alice") -> [95, 87, 92, 88, 91]
-     * Example: getStudentGrades("Unknown") -> []
+     * Return an empty list if the student is not found.
+     *
+     * Example:
+     *   getStudentGrades("Alice")   -> [95, 87, 92, 88, 91]
+     *   getStudentGrades("Unknown") -> []
+     *
+     * Implementation Requirements:
+     *
+     * 1. Do NOT return null.
+     * 2. Use Optional to safely handle the possibility that the student
+     *    may not exist in the map.
      */
     public List<Integer> getStudentGrades(String studentName) {
-        // TODO: Implement using streams or Optional
-        // Hint: Consider using Optional.ofNullable() and orElse()
-        return null;
+
+        // TODO:
+        // 1. Retrieve the value from the map using gradebook.get(studentName)
+        // 2. Wrap it in Optional.ofNullable(...)
+        // 3. Use orElse(...) to return an empty list if null
+
+        return null; // Replace with your implementation
     }
-    
     // =========================================================================
-    // PART 2: Grade Analysis (15 minutes)
+    // PART 2: Grade Analysis
     // =========================================================================
     
     /**
@@ -137,7 +142,7 @@ public class StreamExercise {
     }
     
     // =========================================================================
-    // PART 3: Filtering and Grouping (15 minutes)
+    // PART 3: Filtering and Grouping
     // =========================================================================
     
     /**
@@ -207,11 +212,11 @@ public class StreamExercise {
         // Hint: Use max() with a comparator based on average
         return null;
     }
-    
+
     // =========================================================================
-    // BONUS CHALLENGES (if time permits)
+    // BONUS CHALLENGES
     // =========================================================================
-    
+
     /**
      * Bonus 1: Find all students who have at least one perfect score (100).
      * 
@@ -225,7 +230,7 @@ public class StreamExercise {
     /**
      * Bonus 2: Calculate the class average (average of ALL grades).
      * 
-     * Expected: approximately 80.625
+     * Expected: approximately 81.275
      */
     public double calculateClassAverage() {
         // TODO: Implement if time permits
