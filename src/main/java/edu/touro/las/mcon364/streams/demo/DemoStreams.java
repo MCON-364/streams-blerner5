@@ -78,6 +78,8 @@ public class DemoStreams {
         // From a Collection
         Stream<String> fromCollection = names.stream();
         System.out.println("From Collection: " + fromCollection.toList());
+        //print using forEach and method reference
+        names.stream().forEach(System.out::println);
         
         // From an array
         String[] array = {"One", "Two", "Three"};
@@ -104,13 +106,17 @@ public class DemoStreams {
         Stream<Integer> bounded = Stream.iterate(1, n -> n < 100, n -> n * 2);
         System.out.println("Bounded iterate: " + bounded.toList());
         
-        // IntStream range
+        // IntStream range - can be used for primitive streams
         IntStream range = IntStream.range(1, 6);  // 1 to 5
+        //Note the use of boxed() to convert IntStream to Stream<Integer> for toList()
+        //Primitive streams produce int, long, double directly without boxing, but to collect to List<Integer> we need to box them
         System.out.println("IntStream.range(1,6): " + range.boxed().toList());
         
         // IntStream rangeClosed
         IntStream rangeClosed = IntStream.rangeClosed(1, 5);  // 1 to 5 inclusive
         System.out.println("IntStream.rangeClosed(1,5): " + rangeClosed.boxed().toList());
+        //another way of printing using forEach and method reference
+        IntStream.rangeClosed(1, 5).forEach(System.out::println);
     }
     
     // =========================================================================
@@ -163,11 +169,23 @@ public class DemoStreams {
         System.out.println("filter(starts with 'A'): " + filtered);
         
         // map() - transform each element
+        // map() with method reference
         List<Integer> lengths = names.stream()
                 .map(String::length)
                 .toList();
         System.out.println("map(to length): " + lengths);
-        
+
+        //let's use peek to show what intermediate operations are doing -
+        // peek() is a stateless operation that allows us to see the elements as they pass through the stream
+        names.stream()
+                .peek(n -> System.out.println("Original: " + n))
+                .map(String::toLowerCase)
+                .peek(s -> System.out.println("After toLower: " + s))
+                .map(String::toUpperCase)
+                .peek(s -> System.out.println("After map: " + s))
+                .forEach(s -> System.out.println("Final element: " + s));
+
+
         // map() with lambda
         List<String> uppercased = names.stream()
                 .map(n -> n.toUpperCase())
@@ -175,6 +193,8 @@ public class DemoStreams {
         System.out.println("map(toUpperCase): " + uppercased);
         
         // peek() - perform action without modifying (useful for debugging)
+        //remember - that is what names collection looks like:
+        //private final List<String> names = List.of("Anna", "Michael", "Jonathan", "Eva", "Bob", "Alexandra")
         System.out.print("peek() demonstration: ");
         long count = names.stream()
                 .peek(n -> System.out.print(n + " "))
@@ -276,42 +296,49 @@ public class DemoStreams {
         names.stream()
                 .limit(3)
                 .forEach(n -> System.out.print(n + " "));
-        System.out.println();
         
         // count() - count elements
         long count = names.stream().count();
         System.out.println("count(): " + count);
-        
+
+        // Note these two methods - toList and toArray - are also terminal operations that collect results into a collection or array
         // toList() - collect to unmodifiable list (Java 16+)
         List<String> list = names.stream()
                 .filter(n -> n.length() > 3)
                 .toList();
         System.out.println("toList(): " + list);
         
-        // toArray() - collect to array
+        // toArray() - collect to array (need to provide generator for type)
         String[] array = names.stream()
                 .filter(n -> n.length() > 4)
-                .toArray(String[]::new);
+                .toArray(String[]::new);  //<-- method reference to create array of correct type
         System.out.println("toArray(): " + Arrays.toString(array));
         
         // findFirst() - get first element (respects order)
+        // Note: findFirst() is short-circuiting - it will stop processing once it finds a match
+        // It returns an Optional because there may not be a matching element, so you need to handle the case where it's empty
         Optional<String> first = names.stream()
                 .filter(n -> n.length() > 5)
                 .findFirst();
         System.out.println("findFirst(length > 5): " + first.orElse("none"));
         
         // findAny() - get any element (better for parallel)
+        // Note  -it also returns an Optional for the same reason as findFirst() - there may not be a matching element, so you need to handle the empty case
         Optional<String> any = names.stream()
                 .filter(n -> n.startsWith("A"))
                 .findAny();
         System.out.println("findAny(starts with 'A'): " + any.orElse("none"));
         
         // anyMatch() - true if any element matches
+        // Note: anyMatch() is short-circuiting - it will stop processing once it finds a match, which can improve performance on large streams
+        // It returns a boolean because it's just checking for the presence of a match, so it doesn't need to return the element itself
         boolean hasLongName = names.stream()
                 .anyMatch(n -> n.length() > 7);
         System.out.println("anyMatch(length > 7): " + hasLongName);
         
         // allMatch() - true if all elements match
+        // as before it returns a boolean because it's just checking if all elements satisfy the condition,
+        // so it doesn't need to return the elements themselves
         boolean allNonEmpty = names.stream()
                 .allMatch(n -> !n.isEmpty());
         System.out.println("allMatch(non-empty): " + allNonEmpty);
@@ -322,6 +349,7 @@ public class DemoStreams {
         System.out.println("noneMatch(starts with 'Z'): " + noneStartWithZ);
         
         // min() and max()
+        // These return Optional because there may not be any elements in the stream, so you need to handle the case where it's empty
         Optional<String> shortest = names.stream()
                 .min(Comparator.comparingInt(String::length));
         Optional<String> longest = names.stream()
@@ -399,12 +427,12 @@ public class DemoStreams {
         System.out.println("Original numbers (with duplicates): " + numbers);
         
         // Collectors.toSet() - HashSet, removes duplicates
-        Set<Integer> set = numbers.stream()
+        Set<Integer> set = numbers.stream().filter(n -> n % 2 == 1)
                 .collect(Collectors.toSet());
         System.out.println("toSet(): " + set);
         
         // TreeSet for sorted unique elements
-        TreeSet<Integer> treeSet = numbers.stream()
+        TreeSet<Integer> treeSet = numbers.stream().filter(n -> n % 2 == 1)
                 .collect(Collectors.toCollection(TreeSet::new));
         System.out.println("toCollection(TreeSet): " + treeSet);
     }
@@ -423,11 +451,12 @@ public class DemoStreams {
         Map<String, Integer> nameLengths = names.stream()
                 .collect(Collectors.toMap(
                         name -> name,           // key mapper
-                        name -> name.length()   // value mapper
+                         String::length// value mapper
                 ));
         System.out.println("toMap(name -> length): " + nameLengths);
         
         // Using Function.identity()
+        // Function.identity() is a built-in function that returns its input argument, so it's a convenient way to specify that the key should be the element itself
         Map<String, Integer> withIdentity = names.stream()
                 .collect(Collectors.toMap(
                         Function.identity(),
