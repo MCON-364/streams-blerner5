@@ -45,8 +45,10 @@ public class StreamExercise {
     public List<String> getAllStudentNames() {
         // TODO: Implement using streams
         // Hint: Use keySet().stream() and sorted()
-        return null;
-    }
+        List <String> names = gradebook.keySet().stream() .sorted() .toList();
+        return names;
+
+}
     
     /**
      * Task 1.2: Count the total number of students.
@@ -55,7 +57,8 @@ public class StreamExercise {
      */
     public long countStudents() {
         // TODO: Implement using streams
-        return 0;
+        long count = gradebook.keySet().stream().count();
+        return count;
     }
 
     /**
@@ -79,7 +82,8 @@ public class StreamExercise {
         // 2. Wrap it in Optional.ofNullable(...)
         // 3. Use orElse(...) to return an empty list if null
 
-        return null; // Replace with your implementation
+        List <Integer> grades = Optional.ofNullable(gradebook.get(studentName)).orElse(new ArrayList<>());
+        return grades; // Replace with your implementation
     }
     // =========================================================================
     // PART 2: Grade Analysis
@@ -95,7 +99,8 @@ public class StreamExercise {
     public double calculateAverage(String studentName) {
         // TODO: Implement using streams
         // Hint: Use mapToInt() and average()
-        return 0.0;
+       List <Integer> grades = Optional.ofNullable(gradebook.get(studentName)).orElse(new ArrayList<>());
+        return grades.stream().mapToInt(Integer::intValue).average().orElse(0.0);
     }
     
     /**
@@ -106,7 +111,8 @@ public class StreamExercise {
     public List<Integer> getAllGradesFlattened() {
         // TODO: Implement using streams
         // Hint: Use flatMap() to flatten the lists
-        return null;
+        List<Integer> grades = gradebook.values().stream().flatMap(list -> list.stream()).sorted().toList();
+        return grades;
     }
     
     /**
@@ -117,7 +123,8 @@ public class StreamExercise {
     public int findHighestGrade() {
         // TODO: Implement using streams
         // Hint: Flatten first, then find max
-        return 0;
+        int max = gradebook.values().stream().flatMap(list -> list.stream()).mapToInt(Integer::intValue).max().orElse(0);
+        return max;
     }
     
     /**
@@ -127,7 +134,8 @@ public class StreamExercise {
      */
     public int findLowestGrade() {
         // TODO: Implement using streams
-        return 0;
+        int min = gradebook.values().stream().flatMap(list -> list.stream()).mapToInt(Integer::intValue).min().orElse(0);
+        return min;
     }
     
     /**
@@ -138,7 +146,8 @@ public class StreamExercise {
     public long getTotalGradeCount() {
         // TODO: Implement using streams
         // Hint: You can use flatMap and count, or sum the sizes
-        return 0;
+       long count = gradebook.values().stream().flatMap(list -> list.stream()).count();
+        return count;
     }
     
     // =========================================================================
@@ -153,8 +162,10 @@ public class StreamExercise {
     public List<String> getPassingStudents(double threshold) {
         // TODO: Implement using streams
         // Hint: Filter entries based on average of their grades
-        return null;
+        List<String> above = gradebook.entrySet() .stream() .filter(e -> e.getValue() .stream() .mapToInt(Integer::intValue) .average() .orElse(0.0) >= threshold) .map(e -> e.getKey()) .toList();
+    return above;
     }
+
     
     /**
      * Task 3.2: Get names of students whose average is < threshold.
@@ -163,7 +174,8 @@ public class StreamExercise {
      */
     public List<String> getFailingStudents(double threshold) {
         // TODO: Implement using streams
-        return null;
+        List<String> below = gradebook.entrySet().stream().filter(e -> e.getValue().stream().mapToInt(Integer::intValue).average().orElse(0.0) <= threshold).map(e -> e.getKey()).toList();
+        return below;
     }
     
     /**
@@ -188,7 +200,8 @@ public class StreamExercise {
     public Map<String, List<String>> groupByPerformance() {
         // TODO: Implement using streams
         // Hint: Use Collectors.groupingBy() with a classifier function
-        return null;
+        Map <String, List<String>> performance = gradebook.entrySet().stream().collect(Collectors.groupingBy( e -> { double avg = e.getValue().stream().mapToInt(Integer::intValue).average().orElse(0.0); if (avg >= 90) return "A"; if (avg >= 80) return "B"; if (avg >= 70) return "C"; if (avg >= 60) return "D"; return "F"; }, Collectors.mapping(e -> e.getKey(), Collectors.toList()) ));
+        return performance;
     }
     
     /**
@@ -199,7 +212,8 @@ public class StreamExercise {
     public Map<String, Double> getStudentAverages() {
         // TODO: Implement using streams
         // Hint: Use Collectors.toMap() with a value mapper that calculates average
-        return null;
+        Map <String, Double> stuAvg = gradebook.entrySet().stream().collect(Collectors.toMap( e -> e.getKey(), e -> e.getValue().stream().mapToInt(Integer::intValue).average().orElse(0.0) ));
+        return stuAvg;
     }
     
     /**
@@ -210,7 +224,8 @@ public class StreamExercise {
     public String findTopPerformer() {
         // TODO: Implement using streams
         // Hint: Use max() with a comparator based on average
-        return null;
+        String highest = gradebook.entrySet().stream().max(Comparator.comparingDouble(e -> e.getValue().stream().mapToInt(Integer::intValue).average().orElse(0.0))).get() .getKey();
+        return highest;
     }
 
     // =========================================================================
